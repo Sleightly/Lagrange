@@ -13,9 +13,13 @@ pi = []
 store_L = []
 
 machines = 2
-init_days = 8
-Lbar = 1000
+init_days = 15
+Lbar = 35
 L = 0
+greekL = 1
+pi_val = 0.5
+num_iter = 2
+file = "data.txt"
 
 def initialize(file):
 	with open(file, "r") as ins:
@@ -35,11 +39,11 @@ def initialize(file):
 
 def init_delta():
 	global delta
-	delta = [[0 for i in range(init_days)] for j in range(len(time))]
+	delta = [[0 for i in range(init_days)] for j in range(len(base_array))]
 
 def init_pi():
 	global pi
-	pi = [0.5 for i in range(init_days)]
+	pi = [pi_val for i in range(init_days)]
 
 def init_final_start():
 	for i in range(len(time)):
@@ -48,7 +52,6 @@ def init_final_start():
 def init_g_func():
 	global g_func
 	g_func = [0 for i in range(init_days)]
-	print(g_func)
 
 def init_begin_times():
 	global beginning_times
@@ -112,11 +115,14 @@ def step_size(greekL, optimal, nL):
 def update_pi():
 	global pi
 	update_L()
+	alpha = step_size(greekL, Lbar, L)
+	print("alpha")
+	print(alpha)
 	for i in range(len(pi)):
-		g_value = g_func[i]
-		if g_value < 0:
-			g_value = 0.1
-		pi[i] = pi[i] + step_size(1, Lbar, L) * g_value
+		new_pi = pi[i] + alpha * g_func[i]
+		if new_pi < 0:
+			new_pi = 0
+		pi[i] = new_pi
 
 def update_L():
 	global L
@@ -127,10 +133,6 @@ def update_L():
 	for i in range(len(pi)):
 		total_pi = total_pi + pi[i] * machines
 	L = total_L - total_pi
-
-def update_LBar():
-	global Lbar
-	Lbar = L
 
 def printSchedule():
 	for i in range(len(delta)):
@@ -143,19 +145,22 @@ def objective_function():
 	return 0
 
 if __name__=='__main__':
-	initialize('sample.txt')
-	for i in range(20):
+	initialize(file)
+	for i in range(num_iter):
 		print("iteration number "+str(i))
 		calculate_lowest_L()
 		update_g_func()
 		update_pi()
-		update_LBar()
 		printSchedule()
 		print(pi)
 		print(beginning_times)
+		print(g_func)
+		print(L)
 		print()
 		init_delta()
 		init_begin_times()
+		init_g_func()
+		init_store_L()
 
 
 
